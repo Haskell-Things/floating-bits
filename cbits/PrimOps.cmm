@@ -8,66 +8,89 @@
  * again (to get from one set of registers to another).
  */
 
+#if SIZEOF_DOUBLE != 8
+#error "SIZEOF_DOUBLE != 8"
+#endif
+
+#if SIZEOF_FLOAT != 4
+#error "SIZEOF_FLOAT != 4"
+#endif
+
+#if SIZEOF_VOID_P == 8
+#define __64BITS
+#elif SIZEOF_VOID_P == 4
+#define __32BITS
+#error "32 Bit currently does not really work (although it should). If you want to try nonetheless, remove this line."
+#else
+#error "Only 32 or 64 bit targets are supported"
+#endif
+
 /*
  * Get the bits of a double by saving it to the stack and reading it back.
  */
-double2WordBwzh(D_ d)
+double2WordBwzh
 {
-    I64 res;
-    if (Sp - 8 < SpLim) goto doGC;
-    goto hasSpace;
-doGC:
-    call (stg_gc_prim_p)(d, double2WordBwzh);
-hasSpace:
-    D_[Sp - 8] = d;
-    res = I64[Sp - 8];
-    return (res);
+#ifdef __64BITS
+    P_ j;
+    j = P_[Sp];
+    D_[Sp] = D1;
+    R1 = I64[Sp];
+    jump (j) [R1];
+#else
+    P_ j;
+    I32 tmp;
+    j = P_[Sp];
+    tmp = I32[Sp-4];
+    D_[Sp-4] = D1;
+    R1 = I64[Sp-4];
+    I32[Sp-4] = tmp;
+    jump (j) [R1];
+#endif
 }
 
 /*
  * Convert some bits to a double by saving it to the stack and reading it back.
  */
-word2DoubleBwzh(I64 w)
+word2DoubleBwzh
 {
-    D_ res;
-    if (Sp - 8 < SpLim) goto doGC;
-    goto hasSpace;
-doGC:
-    call (stg_gc_prim_p)(w, word2DoubleBwzh);
-hasSpace:
-    I64[Sp-8] = w;
-    res = D_[Sp-8];
-    return (res);
+#ifdef __64BITS
+    P_ j;
+    j = P_[Sp];
+    I64[Sp] = R1;
+    D1 = D_[Sp];
+    jump (j) [D1];
+#else
+    P_ j;
+    I32 tmp;
+    j = P_[Sp];
+    tmp = I32[Sp-4];
+    I64[Sp-4] = R1;
+    D1 = D_[Sp-4];
+    I32[Sp-4] = tmp;
+    jump (j) [R1];
+#endif
 }
 
 /*
  * Get the bits of a float by saving it to the stack and reading it back.
  */
-float2WordBwzh(F_ f)
+float2WordBwzh
 {
-    I32 res;
-    if (Sp - 8 < SpLim) goto doGC;
-    goto hasSpace;
-doGC:
-    call (stg_gc_prim_p)(f, float2WordBwzh);
-hasSpace:
-    F_[Sp - 8] = f;
-    res = I32[Sp - 8];
-    return (res);
+    P_ j;
+    j = P_[Sp];
+    F_[Sp] = F1;
+    R1 = I32[Sp];
+    jump (j) [R1];
 }
 
 /*
- * Convert some bits to a double by saving it to the stack and reading it back.
+ * Convert some bits to a float by saving it to the stack and reading it back.
  */
-word2FloatBwzh(I32 w)
+word2FloatBwzh
 {
-    F_ res;
-    if (Sp - 8 < SpLim) goto doGC;
-    goto hasSpace;
-doGC:
-    call (stg_gc_prim_p)(w, word2FloatBwzh);
-hasSpace:
-    I32[Sp-8] = w;
-    res = F_[Sp-8];
-    return (res);
+    P_ j;
+    j = P_[Sp];
+    I32[Sp] = R1;
+    F1 = F_[Sp];
+    jump (j) [F1];
 }

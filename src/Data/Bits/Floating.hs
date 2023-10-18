@@ -2,6 +2,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE GHCForeignImportPrim #-}
 {-# LANGUAGE UnliftedFFITypes #-}
+{-# LANGUAGE CPP #-}
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2015 Anselm Jonas Scholl
@@ -13,6 +14,9 @@
 -- Conversions between floating point values and integral values preserving
 -- the bit-patterns.
 ----------------------------------------------------------------------------
+
+#include "MachDeps.h"
+
 module Data.Bits.Floating (
      double2WordBitwise
     ,word2DoubleBitwise
@@ -23,10 +27,20 @@ module Data.Bits.Floating (
 import GHC.Exts
 import GHC.Word
 
+#if WORD_SIZE_IN_BITS == 64
 foreign import prim "double2WordBwzh"
     double2WordBitwise# :: Double# -> Word#
 foreign import prim "word2DoubleBwzh"
     word2DoubleBitwise# :: Word# -> Double#
+#elif WORD_SIZE_IN_BITS == 32
+foreign import prim "double2WordBwzh"
+    double2WordBitwise# :: Double# -> Word64#
+foreign import prim "word2DoubleBwzh"
+    word2DoubleBitwise# :: Word64# -> Double#
+#else
+#error "Unsupported word size"
+#endif
+
 foreign import prim "float2WordBwzh"
     float2WordBitwise# :: Float# -> Word#
 foreign import prim "word2FloatBwzh"
