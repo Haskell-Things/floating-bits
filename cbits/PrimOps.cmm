@@ -2,31 +2,82 @@
 #include "MachDeps.h"
 
 /*
- * Prim ops to convert floating point values to integral values of the same size
- * preserving the bits of the floating point values and back again.
+ * Prim-ops for coercing between floating point values and integral values.
+ *
  * Currently we do this by storing the value on the stack and reading it back
- * again (to get from one set of registers to another).
+ * again (to get from one set of registers to another). To avoid dealing with
+ * the possibility of a stack overflow (and the need to trigger a GC), we borrow
+ * the memory of the continuation pointer. This should be faster than any temporary
+ * allocated memory as we do not have to allocate anything.
+ *
+ * Note [Stack order after prim op (x86_64)]
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * Even if we use the stack during a prim op, it should be exactly in the state
+ * as it was before the prim op after the prim op. Especially this means that
+ * we have to restore the continuation on the stack before jumping to it. I do not
+ * know the exact reason, but several are possible:
+ *   - The continuation calls into the RTS, which may expect the continuation to
+ *     be on top of the stack on return. This seems like the most likely reason.
+ *   - The continuation has to access its info table. Rather than using a static
+ *     (long) address, the address from the stack is taken.
+ *   - The continuation calls itself recursively by calling the continuation from
+ *     the top of the stack. But again it could be written differently.
+ *
+ * Whatever the real reason is, it is important to leave the stack unchanged,
+ * otherwise SIGSEGV awaits.
+ *
+ * Note [Calling conventions]
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * The calling convention is different depending on the architecture the code runs on.
+ *
+ * The return conventions seems to be the same for both x86 and x86_64:
+ *   - Float# values are returned in F1.
+ *   - Double# values are returned in D1.
+ *   - 32 bit integral values are returned in R1.
+ *   - 64 bit integral values are returned in R1 or L1 (x86, R1 is only 32 bit wide).
+ *   - Sp points to the continuation we jump to, so if something was pushed on the
+ *     stack we have to remove it first.
+ *
+ * x86_64:
+ *   - The first Double#/Float#/32 or 64 bit integral number is passed via D1/F1/R1
+ *
+ * x86:
+ *   - The first Double#/Float#/64 bit integral number is passed via the stack.
+ *   - We have to clean up the arguments passed to us via the stack.
+ *   - The first 32 bit integral number is passed via R1.
+ *
+ * Note [GHC Version]
+ * ~~~~~~~~~~~~~~~~~~
+ *
+ * Between GHC 7.6 and 7.8 there seems to have been a change in the calling
+ * convention, so this code will only work for GHC 7.8 and later.
+ * I tested this with
+ *   - GHC 7.8.3 on Windows, both 32 and 64 bit
+ *   - GHC 7.10.1 on Linux, both 32 and 64 bit
+ *
  */
 
 #if SIZEOF_DOUBLE != 8
-#error "SIZEOF_DOUBLE != 8"
+    #error "SIZEOF_DOUBLE != 8"
 #endif
 
 #if SIZEOF_FLOAT != 4
-#error "SIZEOF_FLOAT != 4"
+    #error "SIZEOF_FLOAT != 4"
 #endif
 
 #if SIZEOF_VOID_P == 8
-#define __64BITS
+    #define __64BITS
 #elif SIZEOF_VOID_P == 4
-#define __32BITS
-#error "32 Bit currently does not really work (although it should). If you want to try nonetheless, remove this line."
+    #define __32BITS
 #else
-#error "Only 32 or 64 bit targets are supported"
+    #error "Only 32 or 64 bit targets are supported"
 #endif
 
 /*
  * Get the bits of a double by saving it to the stack and reading it back.
+ * On the x86 the argument is passed via the stack, so we just pop it of the stack.
  */
 double2WordBwzh
 {
@@ -35,21 +86,18 @@ double2WordBwzh
     j = P_[Sp];
     D_[Sp] = D1;
     R1 = I64[Sp];
+    P_[Sp] = j;
     jump (j) [R1];
 #else
-    P_ j;
-    I32 tmp;
-    j = P_[Sp];
-    tmp = I32[Sp-4];
-    D_[Sp-4] = D1;
-    R1 = I64[Sp-4];
-    I32[Sp-4] = tmp;
-    jump (j) [R1];
+    L1 = I64[Sp];
+    Sp = Sp + 8;
+    jump (P_[Sp]) [L1];
 #endif
 }
 
 /*
  * Convert some bits to a double by saving it to the stack and reading it back.
+ * On the x86 the argument is passed via the stack, so we just pop it of the stack.
  */
 word2DoubleBwzh
 {
@@ -58,33 +106,41 @@ word2DoubleBwzh
     j = P_[Sp];
     I64[Sp] = R1;
     D1 = D_[Sp];
+    P_[Sp] = j;
     jump (j) [D1];
 #else
-    P_ j;
-    I32 tmp;
-    j = P_[Sp];
-    tmp = I32[Sp-4];
-    I64[Sp-4] = R1;
-    D1 = D_[Sp-4];
-    I32[Sp-4] = tmp;
-    jump (j) [R1];
+    D1 = D_[Sp];
+    Sp = Sp + 8;
+    jump (P_[Sp]) [D1];
 #endif
 }
 
 /*
  * Get the bits of a float by saving it to the stack and reading it back.
+ * On the x86 the argument is passed via the stack, so we just pop it of the stack.
  */
 float2WordBwzh
 {
+#ifdef __64BITS
     P_ j;
     j = P_[Sp];
     F_[Sp] = F1;
-    R1 = I32[Sp];
+    I32 tmp;
+    tmp = I32[Sp];
+    R1 = %zx64(tmp);
+    P_[Sp] = j;
     jump (j) [R1];
+#else
+    R1 = I32[Sp];
+    Sp = Sp + 4;
+    jump (P_[Sp]) [R1];
+#endif
 }
 
 /*
  * Convert some bits to a float by saving it to the stack and reading it back.
+ * In contrast to our other prim ops, this has the same code for x86 and x86_64:
+ * x86 passes a 32-bit integer argument via R1 just like x86_64.
  */
 word2FloatBwzh
 {
@@ -92,5 +148,6 @@ word2FloatBwzh
     j = P_[Sp];
     I32[Sp] = R1;
     F1 = F_[Sp];
+    P_[Sp] = j;
     jump (j) [F1];
 }
