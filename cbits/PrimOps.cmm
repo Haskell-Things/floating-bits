@@ -1,0 +1,73 @@
+#include "Cmm.h"
+#include "MachDeps.h"
+
+/*
+ * Prim ops to convert floating point values to integral values of the same size
+ * preserving the bits of the floating point values and back again.
+ * Currently we do this by storing the value on the stack and reading it back
+ * again (to get from one set of registers to another).
+ */
+
+/*
+ * Get the bits of a double by saving it to the stack and reading it back.
+ */
+double2WordBwzh(D_ d)
+{
+    I64 res;
+    if (Sp - 8 < SpLim) goto doGC;
+    goto hasSpace;
+doGC:
+    call (stg_gc_prim_p)(d, double2WordBwzh);
+hasSpace:
+    D_[Sp - 8] = d;
+    res = I64[Sp - 8];
+    return (res);
+}
+
+/*
+ * Convert some bits to a double by saving it to the stack and reading it back.
+ */
+word2DoubleBwzh(I64 w)
+{
+    D_ res;
+    if (Sp - 8 < SpLim) goto doGC;
+    goto hasSpace;
+doGC:
+    call (stg_gc_prim_p)(w, word2DoubleBwzh);
+hasSpace:
+    I64[Sp-8] = w;
+    res = D_[Sp-8];
+    return (res);
+}
+
+/*
+ * Get the bits of a float by saving it to the stack and reading it back.
+ */
+float2WordBwzh(F_ f)
+{
+    I32 res;
+    if (Sp - 8 < SpLim) goto doGC;
+    goto hasSpace;
+doGC:
+    call (stg_gc_prim_p)(f, float2WordBwzh);
+hasSpace:
+    F_[Sp - 8] = f;
+    res = I32[Sp - 8];
+    return (res);
+}
+
+/*
+ * Convert some bits to a double by saving it to the stack and reading it back.
+ */
+word2FloatBwzh(I32 w)
+{
+    F_ res;
+    if (Sp - 8 < SpLim) goto doGC;
+    goto hasSpace;
+doGC:
+    call (stg_gc_prim_p)(w, word2FloatBwzh);
+hasSpace:
+    I32[Sp-8] = w;
+    res = F_[Sp-8];
+    return (res);
+}
