@@ -25,9 +25,9 @@ import GHC.Word
 
 #if WORD_SIZE_IN_BITS == 64
 foreign import prim "double2WordBwzh"
-    double2WordBitwise# :: Double# -> Word#
+    double2WordBitwise# :: Double# -> Word64#
 foreign import prim "word2DoubleBwzh"
-    word2DoubleBitwise# :: Word# -> Double#
+    word2DoubleBitwise# :: Word64# -> Double#
 #elif WORD_SIZE_IN_BITS == 32
 foreign import prim "double2WordBwzh"
     double2WordBitwise# :: Double# -> Word64#
@@ -38,9 +38,9 @@ foreign import prim "word2DoubleBwzh"
 #endif
 
 foreign import prim "float2WordBwzh"
-    float2WordBitwise# :: Float# -> Word#
+    float2WordBitwise# :: Float# -> Word32#
 foreign import prim "word2FloatBwzh"
-    word2FloatBitwise# :: Word# -> Float#
+    word2FloatBitwise# :: Word32# -> Float#
 
 -- | Convert a 'Double' to a 'Word64' while preserving the bit-pattern.
 {-# INLINE double2WordBitwise #-}
