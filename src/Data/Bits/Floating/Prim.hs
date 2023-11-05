@@ -23,19 +23,17 @@ module Data.Bits.Floating.Prim where
 import GHC.Exts
 import GHC.Word
 
-#if WORD_SIZE_IN_BITS == 64
+#if WORD_SIZE_IN_BITS == 64 && MIN_VERSION_base(4,17,0)
 -- The name of Word# changed to Word64# in ghc 9.4.1
-#if MIN_VERSION_base(4,17,0)
 foreign import prim "double2WordBwzh"
     double2WordBitwise# :: Double# -> Word64#
 foreign import prim "word2DoubleBwzh"
     word2DoubleBitwise# :: Word64# -> Double#
-#else
+#elif WORD_SIZE_IN_BITS == 64
 foreign import prim "double2WordBwzh"
     double2WordBitwise# :: Double# -> Word#
 foreign import prim "word2DoubleBwzh"
     word2DoubleBitwise# :: Word# -> Double#
-#endif
 #elif WORD_SIZE_IN_BITS == 32
 foreign import prim "double2WordBwzh"
     double2WordBitwise# :: Double# -> Word64#
