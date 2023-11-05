@@ -1,8 +1,3 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
-{-# LANGUAGE MagicHash                #-}
-{-# LANGUAGE GHCForeignImportPrim     #-}
-{-# LANGUAGE UnliftedFFITypes         #-}
-{-# LANGUAGE CPP                      #-}
 -----------------------------------------------------------------------------
 -- |
 -- Copyright   :  (C) 2015 Anselm Jonas Scholl
@@ -16,6 +11,12 @@
 -- boxed values.
 ----------------------------------------------------------------------------
 
+{-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE MagicHash                #-}
+{-# LANGUAGE GHCForeignImportPrim     #-}
+{-# LANGUAGE UnliftedFFITypes         #-}
+{-# LANGUAGE CPP                      #-}
+
 #include "MachDeps.h"
 
 module Data.Bits.Floating.Prim where
@@ -23,35 +24,26 @@ module Data.Bits.Floating.Prim where
 import GHC.Exts
 import GHC.Word
 
-#if WORD_SIZE_IN_BITS == 64 && MIN_VERSION_base(4,17,0)
+#if MIN_VERSION_base(4,17,0)
 -- The name of Word# changed to Word64# in ghc 9.4.1
-foreign import prim "double2WordBwzh"
-    double2WordBitwise# :: Double# -> Word64#
-foreign import prim "word2DoubleBwzh"
-    word2DoubleBitwise# :: Word64# -> Double#
-#elif WORD_SIZE_IN_BITS == 64
-foreign import prim "double2WordBwzh"
-    double2WordBitwise# :: Double# -> Word#
-foreign import prim "word2DoubleBwzh"
-    word2DoubleBitwise# :: Word# -> Double#
-#elif WORD_SIZE_IN_BITS == 32 && MIN_VERSION_base(4,17,0)
--- The name of Word# changed to Word64# in ghc 9.4.1                                                                                                                              foreign import prim "double2WordBwzh"
-    double2WordBitwise# :: Double# -> Word64#
-foreign import prim "word2DoubleBwzh"
-    word2DoubleBitwise# :: Word64# -> Double#
-#elif WORD_SIZE_IN_BITS == 32
-foreign import prim "double2WordBwzh"
-    double2WordBitwise# :: Double# -> Word#
-foreign import prim "word2DoubleBwzh"
-    word2DoubleBitwise# :: Word# -> Double#
+#define WORD64 Word64
+#define WORD32 Word32
 #else
-#error "Unsupported word size"
+#define WORD64 Word
+#define WORD32 Word
 #endif
 
+foreign import prim "double2WordBwzh"
+    double2WordBitwise# :: Double# -> WORD64#
+foreign import prim "word2DoubleBwzh"
+    word2DoubleBitwise# :: WORD64# -> Double#
 foreign import prim "float2WordBwzh"
-    float2WordBitwise# :: Float# -> Word32#
+    float2WordBitwise# :: Float# -> WORD32#
 foreign import prim "word2FloatBwzh"
-    word2FloatBitwise# :: Word32# -> Float#
+    word2FloatBitwise# :: WORD32# -> Float#
+
+#undef WORD64
+#undef WORD32
 
 -- | Convert a 'Double' to a 'Word64' while preserving the bit-pattern.
 {-# INLINE double2WordBitwise #-}
