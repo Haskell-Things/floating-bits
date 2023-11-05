@@ -34,11 +34,16 @@ foreign import prim "double2WordBwzh"
     double2WordBitwise# :: Double# -> Word#
 foreign import prim "word2DoubleBwzh"
     word2DoubleBitwise# :: Word# -> Double#
-#elif WORD_SIZE_IN_BITS == 32
-foreign import prim "double2WordBwzh"
+#elif WORD_SIZE_IN_BITS == 32 && MIN_VERSION_base(4,17,0)
+-- The name of Word# changed to Word64# in ghc 9.4.1                                                                                                                              foreign import prim "double2WordBwzh"
     double2WordBitwise# :: Double# -> Word64#
 foreign import prim "word2DoubleBwzh"
     word2DoubleBitwise# :: Word64# -> Double#
+#elif WORD_SIZE_IN_BITS == 32
+foreign import prim "double2WordBwzh"
+    double2WordBitwise# :: Double# -> Word#
+foreign import prim "word2DoubleBwzh"
+    word2DoubleBitwise# :: Word# -> Double#
 #else
 #error "Unsupported word size"
 #endif
