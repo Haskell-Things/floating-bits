@@ -50,10 +50,17 @@ foreign import prim "word2DoubleBwzh"
 #undef WORD64
 #undef WORD32
 
+#if MIN_VERSION_base(4,15,0)
 foreign import prim "float2WordBwzh"
     float2WordBitwise# :: Float# -> Word32#
 foreign import prim "word2FloatBwzh"
     word2FloatBitwise# :: Word32# -> Float#
+#else
+foreign import prim "float2WordBwzh"
+    float2WordBitwise# :: Float# -> Word#
+foreign import prim "word2FloatBwzh"
+    word2FloatBitwise# :: Word# -> Float#
+#endif
 
 -- | Convert a 'Double' to a 'Word64' while preserving the bit-pattern.
 {-# INLINE double2WordBitwise #-}
