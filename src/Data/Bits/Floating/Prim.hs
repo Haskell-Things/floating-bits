@@ -33,17 +33,34 @@ import GHC.Word
 #define WORD32 Word
 #endif
 
+#if WORD_SIZE_IN_BITS == 64
 foreign import prim "double2WordBwzh"
     double2WordBitwise# :: Double# -> WORD64#
 foreign import prim "word2DoubleBwzh"
     word2DoubleBitwise# :: WORD64# -> Double#
-foreign import prim "float2WordBwzh"
-    float2WordBitwise# :: Float# -> WORD32#
-foreign import prim "word2FloatBwzh"
-    word2FloatBitwise# :: WORD32# -> Float#
+#elif WORD_SIZE_IN_BITS == 32
+foreign import prim "double2WordBwzh"
+    double2WordBitwise# :: Double# -> WORD32#
+foreign import prim "word2DoubleBwzh"
+    word2DoubleBitwise# :: WORD32# -> Double#
+#else
+#error "Unsupported word size"
+#endif
 
 #undef WORD64
 #undef WORD32
+
+#if MIN_VERSION_base(4,15,0)
+foreign import prim "float2WordBwzh"
+    float2WordBitwise# :: Float# -> Word32#
+foreign import prim "word2FloatBwzh"
+    word2FloatBitwise# :: Word32# -> Float#
+#else
+foreign import prim "float2WordBwzh"
+    float2WordBitwise# :: Float# -> Word#
+foreign import prim "word2FloatBwzh"
+    word2FloatBitwise# :: Word# -> Float#
+#endif
 
 -- | Convert a 'Double' to a 'Word64' while preserving the bit-pattern.
 {-# INLINE double2WordBitwise #-}
@@ -64,3 +81,4 @@ float2WordBitwise (F# f) = W32# (float2WordBitwise# f)
 {-# INLINE word2FloatBitwise #-}
 word2FloatBitwise :: Word32 -> Float
 word2FloatBitwise (W32# w) = F# (word2FloatBitwise# w)
+

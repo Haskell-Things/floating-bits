@@ -29,7 +29,16 @@ debug = False
 --   test if coercion between these values works.
 {-# SPECIALIZE testCoercion :: (Float, Word32) -> IO () #-}
 {-# SPECIALIZE testCoercion :: (Double, Word64) -> IO () #-}
-testCoercion :: (Show f, Show w, Integral w, RealFloat f, FloatingBits f w, Monad m) => (f, w) -> m ()
+testCoercion
+  :: ( Show f
+     , Show w
+     , Integral w
+     , RealFloat f
+     , FloatingBits f w
+     , MonadFail m
+     )
+  => (f, w)
+  -> m ()
 testCoercion (f, w) = do
     let w'  = coerceToWord f
         f'  = coerceToFloat w
@@ -40,7 +49,7 @@ testCoercion (f, w) = do
 
 -- | Called when a conversion fails.
 {-# SPECIALIZE failTest :: String -> String -> String -> IO () #-}
-failTest :: Monad m => String -> String -> String -> m ()
+failTest :: MonadFail m => String -> String -> String -> m ()
 failTest from wanted got = fail $ "Conversion from " ++ from ++ " to " ++ wanted ++ " failed. Got " ++ got
 
 -- | Check if two floats are really equal: Not only equal as defined by the IEEE
@@ -113,7 +122,7 @@ go cpus cur = do
     unless (maxBound - cur < cpus) $ go cpus (cur + cpus)
 
 {-# SPECIALIZE doTest :: Word32 -> IO () #-}
-doTest :: Monad m => Word32 -> m ()
+doTest :: MonadFail m => Word32 -> m ()
 doTest w = do
     -- test coercions
     let !refFloat   = refWordToFloat w :: Float
@@ -153,7 +162,17 @@ doTest w = do
 
 {-# SPECIALIZE INLINE testNextPrev :: (Float -> Float) -> (Float -> Float) -> Float -> IO () #-}
 {-# SPECIALIZE INLINE testNextPrev :: (Double -> Double) -> (Double -> Double) -> Double -> IO () #-}
-testNextPrev :: (Monad m, RealFloat f, FloatingBits f w, Show f, HasNaN f) => (f -> f) -> (f -> f) -> f -> m ()
+testNextPrev
+  :: ( MonadFail m
+     , RealFloat f
+     , FloatingBits f w
+     , Show f
+     , ShowFloat f
+     )
+  => (f -> f)
+  -> (f -> f)
+  -> f
+  -> m ()
 testNextPrev refNextUp refNextDown testFloat = do
     let !refNextFloat = refNextUp testFloat
         !refPrevFloat = refNextDown testFloat
@@ -181,7 +200,7 @@ testNextPrev refNextUp refNextDown testFloat = do
 {-# SPECIALIZE testAssert :: String -> Float -> Float -> (Float -> Float -> Bool) -> String -> String -> IO () #-}
 {-# SPECIALIZE testAssert :: String -> Word64 -> Word64 -> (Word64 -> Word64 -> Bool) -> String -> String -> IO () #-}
 {-# SPECIALIZE testAssert :: String -> Double -> Double -> (Double -> Double -> Bool) -> String -> String -> IO () #-}
-testAssert :: (Monad m, Show a) => String -> a -> a -> (a -> a -> Bool) -> String -> String -> m ()
+testAssert :: (MonadFail m, Show a) => String -> a -> a -> (a -> a -> Bool) -> String -> String -> m ()
 testAssert ts a b f s s2 = unless (f a b) $
     fail $ "Assert failed: " ++ show a ++ " " ++ s ++ " " ++ show b ++ ": " ++ s2 ++ " (" ++ ts ++ ")"
 
