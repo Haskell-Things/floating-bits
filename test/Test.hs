@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
 import TestUtils
@@ -30,7 +31,8 @@ debug = False
 {-# SPECIALIZE testCoercion :: (Float, Word32) -> IO () #-}
 {-# SPECIALIZE testCoercion :: (Double, Word64) -> IO () #-}
 testCoercion
-  :: ( Show f
+  :: forall f w m
+   . ( Show f
      , Show w
      , Integral w
      , RealFloat f
@@ -40,9 +42,9 @@ testCoercion
   => (f, w)
   -> m ()
 testCoercion (f, w) = do
-    let w'  = coerceToWord f
-        f'  = coerceToFloat w
-        w'' = coerceToWord f'
+    let w'  = (coerceToWord :: f -> w) f
+        f'  = (coerceToFloat :: w -> f)  w
+        w'' = (coerceToWord :: f -> w) f'
     unless (w' == w) $ failTest (show f) (showW w) (showW w')
     unless (f' `eqFloat` f) $ failTest (showW w) (show f) (show f')
     unless (w'' == w) $ failTest (show f') (showW w) (showW w'')
