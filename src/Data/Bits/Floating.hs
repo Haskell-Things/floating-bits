@@ -61,7 +61,6 @@ class (Floating f, Integral w) => FloatingBits f w | f -> w where
     --   If @x@ is not NaN, @'ulp' x == 'ulp' (-x)@ holds.
     ulp :: f -> f
 
-
 class ShowFloat f where
     {-# MINIMAL showsFloat | showFloat #-}
     -- | Like 'showFloat', but prepends the value to another string.
@@ -72,7 +71,7 @@ class ShowFloat f where
     showFloat :: f -> String
     showFloat f = showsFloat f ""
 
-{-# RULES "showFloat/++" forall f s . showFloat f ++ s = showsFloat f s #-}
+-- {-# RULES "showFloat/++" forall f s . showFloat f ++ s = showsFloat f s #-}
 
 instance FloatingBits Float Word32 where
     {-# INLINE coerceToWord #-}
