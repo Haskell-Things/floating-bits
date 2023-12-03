@@ -2,7 +2,6 @@
 module TestUtils where
 
 import Data.Word
-import Data.Bits
 
 import Numeric
 

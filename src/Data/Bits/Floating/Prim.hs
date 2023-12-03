@@ -28,13 +28,14 @@ module Data.Bits.Floating.Prim (
 import GHC.Exts (Double#, Double(D#), Float#, Float(F#), Word32#, Word64#)
 import GHC.Word (Word32(W32#), Word64(W64#))
 
+
 #if WORD_SIZE_IN_BITS == 64 && MIN_VERSION_base(4,17,0)
 -- The name of Word# changed to Word64# in ghc 9.4.1
 #define WORD64 Word64
 #define WORD32 Word32
 #elif WORD_SIZE_IN_BITS == 64
-#define WORD64 Word64
-#define WORD32 Word32
+#define WORD64 Word
+#define WORD32 Word
 #else
 #error non-X86_64 architectures not supported
 #endif
@@ -70,3 +71,4 @@ float2WordBitwise (F# f) = W32# (float2WordBitwise# f)
 {-# INLINE word2FloatBitwise #-}
 word2FloatBitwise :: Word32 -> Float
 word2FloatBitwise (W32# w) = F# (word2FloatBitwise# w)
+
