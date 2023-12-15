@@ -37,8 +37,8 @@ import GHC.Exts (Word64#, Word32#)
 -- Earlier than GHC 9.4? then Word is our 64 bit type.
 import GHC.Exts (Word#)
 #define WORD64 Word
-#if MIN_VERSION_base(4,15,0)
--- Word32 and Word diverged in base 4.15.0 (GHC 9.0.1?))
+#if MIN_VERSION_base(4,16,0)
+-- Word32 and Word diverged in base 4.16.0 (GHC 9.2.1?))
 import GHC.Exts (Word32#)
 #define WORD32 Word32
 #else
