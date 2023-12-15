@@ -36,12 +36,12 @@ import GHC.Exts (Word64#, Word32#)
 #elif WORD_SIZE_IN_BITS == 64
 import GHC.Exts (Word#)
 #define WORD64 Word
--- #if MIN_VERSION_base(4,15,0)
--- #define WORD32 Word
--- #else
+#if MIN_VERSION_base(4,15,0)
+#define WORD32 Word
+#else
 import GHC.Exts (Word32#)
 #define WORD32 Word32
--- #endif
+#endif
 #else
 #error non-X86_64 architectures not supported
 #endif
