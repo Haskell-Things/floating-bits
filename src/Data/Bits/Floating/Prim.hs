@@ -29,17 +29,20 @@ import GHC.Exts (Double#, Double(D#), Float#, Float(F#))
 import GHC.Word (Word32(W32#), Word64(W64#))
 
 #if WORD_SIZE_IN_BITS == 64 && MIN_VERSION_base(4,17,0)
--- The name of Word# changed to Word64# in ghc 9.4.1
+-- The name of Word# changed to Word64# in base 4.17.0 (GHC 9.4.1)
 import GHC.Exts (Word64#, Word32#)
 #define WORD64 Word64
 #define WORD32 Word32
 #elif WORD_SIZE_IN_BITS == 64
+-- Earlier than GHC 9.4? then Word is our 64 bit type.
 import GHC.Exts (Word#)
 #define WORD64 Word
 #if MIN_VERSION_base(4,15,0)
+-- Word32 and Word diverged in base 4.15.0 (GHC 9.0.1?))
 import GHC.Exts (Word32#)
 #define WORD32 Word32
 #else
+-- Earlier than GHC9? then use Word for both 32 and 64 bit FFI calls.
 #define WORD32 Word
 #endif
 #else
