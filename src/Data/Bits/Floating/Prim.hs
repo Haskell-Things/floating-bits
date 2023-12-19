@@ -25,6 +25,9 @@ module Data.Bits.Floating.Prim (
   word2DoubleBitwise,
   word2FloatBitwise) where
 
+-- We use nothing from the Base library here.
+import Prelude ()
+
 import GHC.Exts (Double#, Double(D#), Float#, Float(F#))
 import GHC.Word (Word32(W32#), Word64(W64#))
 
@@ -33,6 +36,7 @@ import GHC.Word (Word32(W32#), Word64(W64#))
 import GHC.Exts (Word64#, Word32#)
 #define WORD64 Word64
 #define WORD32 Word32
+-- FIXME: this is wrong. what's a better test here?
 #elif WORD_SIZE_IN_BITS == 64
 -- Earlier than GHC 9.4? then Word is our 64 bit type.
 import GHC.Exts (Word#)
@@ -42,7 +46,7 @@ import GHC.Exts (Word#)
 import GHC.Exts (Word32#)
 #define WORD32 Word32
 #else
--- Earlier than GHC9? then use Word for both 32 and 64 bit FFI calls.
+-- Earlier than GHC9.2? then use Word for both 32 and 64 bit FFI calls.
 #define WORD32 Word
 #endif
 #else
