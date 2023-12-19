@@ -76,6 +76,12 @@ floatExpBitMask = 0x7F800000
 -- * Generic implementation
 ---------------------------
 
+-- | Advance a RealFloat by one unit in the last place (ULP).
+--
+-- If the argument is NaN, NaN is returned.
+-- If the argument is +INF, +INF is returned.
+-- If the argument is (-)0.0, the minimum value greater than 0.0 is returned.
+-- if the argument is -INF, -INF is returned.
 {-# INLINE genericUp #-}
 genericUp :: (RealFloat f, Num w) => (f -> w) -> (w -> f) -> f -> f
 genericUp mkW mkF f

@@ -1,4 +1,3 @@
-{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE FunctionalDependencies #-}
 -----------------------------------------------------------------------------
 -- |
@@ -24,13 +23,26 @@ module Data.Bits.Floating (
     ,fromCDouble
     ) where
 
-import Data.Bits
-import Data.Bits.Floating.Prim
-import Data.Bits.Floating.Ulp
-import Data.Word
+-- Our base library.
+import Prelude (Double, Float, Floating, Integral, ShowS, String, (.), (/=), (++), id, isNaN, otherwise, shows)
+
+-- Our bitwise and operator.
+import Data.Bits ((.&.))
+
+-- Conversion wrappers.
+import Data.Bits.Floating.Prim (double2WordBitwise, float2WordBitwise, word2DoubleBitwise, word2FloatBitwise)
+
+-- Functions for getting ULPs.
+import Data.Bits.Floating.Ulp (doubleNextUlp, doublePrevUlp, doubleUlp, floatNextUlp, floatPrevUlp, floatUlp)
+
+-- Our byte formats.
+import Data.Word (Word32, Word64)
+
+-- A function to dump hexidecimal.
 import Numeric (showHex)
 
-import Foreign.C.Types
+-- Types corresponding to C's Double and Float.
+import Foreign.C.Types (CDouble(CDouble), CFloat(CFloat))
 
 class (Floating f, Integral w) => FloatingBits f w | f -> w where
     -- | Coerce a floating point number to an integral number preserving the
@@ -51,7 +63,7 @@ class (Floating f, Integral w) => FloatingBits f w | f -> w where
     nextUp :: f -> f
     -- | Return the next floating point value in the direction of -INF.
     --   If the argument is NaN, NaN is returned. If the argument is -INF,
-    --   +INF is returned. If the argument is 0.0, the minimum value smaller than
+    --   +INF is returned. If the argument is 0.0, the maximum value smaller than
     --   0.0 is returned.
     nextDown :: f -> f
     -- | Return the size of an ulp of the argument. If the argument is NaN, NaN
