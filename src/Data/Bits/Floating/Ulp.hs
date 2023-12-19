@@ -1,18 +1,31 @@
+-----------------------------------------------------------------------------
+-- |
+-- Copyright   :  (C) 2015 Anselm Jonas Scholl, (C) 2023 Julia Longtin
+-- License     :  BSD3
+-- Maintainer  :  Julia Longtin <Julia.longtin@gmail.com>
+-- Stability   :  experimental
+-- Portability :  GHC-specific
+--
+-- Provides increment-by-ulp, decrement-by-ulp, and get-ulp functions for
+-- Doubles, and Floats.
+----------------------------------------------------------------------------
 {-# LANGUAGE ScopedTypeVariables #-}
+
 module Data.Bits.Floating.Ulp (
      doubleNextUlp
     ,doublePrevUlp
     ,doubleUlp
-
     ,floatNextUlp
     ,floatPrevUlp
     ,floatUlp
     ) where
 
-import Data.Int
-import Data.Bits
-import Data.Bits.Floating.Prim
+import Prelude (Double, Float, Integral, Num, RealFloat, Show, (<), (>), ($), (+), (-), (>=), (&&), (==), (||), abs, fromIntegral, isInfinite, isNaN, isNegativeZero, otherwise)
+import Data.Int (Int64, Int32)
+import Data.Bits (Bits, (.&.), shiftL, shiftR)
+import Data.Bits.Floating.Prim (double2WordBitwise, float2WordBitwise, word2DoubleBitwise, word2FloatBitwise)
 
+-- Tell HLint to ignore suggestions to eta-reduce expressions in this module.
 {-# ANN module "HLint: ignore Eta reduce" #-}
 
 ---------------------
@@ -95,9 +108,9 @@ genericUlp mkW mkF expBitMask significandWidth expBias maxExponent minExponent m
         powerOfTwo :: i -> f
         powerOfTwo n = mkF $ fromIntegral $ ((n + expBias) `shiftL` fromIntegral (significandWidth - 1)) .&. expBitMask
 
-----------------------------
--- * Specific implementation
-----------------------------
+-----------------------------
+-- * Specific implementations
+-----------------------------
 
 -- | Advance a 'Double' by one ULP.
 {-# INLINABLE doubleNextUlp #-}
