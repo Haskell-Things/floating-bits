@@ -1,8 +1,8 @@
 -----------------------------------------------------------------------------
 -- |
--- Copyright   :  (C) 2015 Anselm Jonas Scholl
+-- Copyright   :  (C) 2015 Anselm Jonas Scholl, (C) 2023 Julia Longtin
 -- License     :  BSD3
--- Maintainer  :  Anselm Jonas Scholl <anselm.scholl@tu-harburg.de>
+-- Maintainer  :  Julia Longtin
 -- Stability   :  experimental
 -- Portability :  GHC-specific
 --

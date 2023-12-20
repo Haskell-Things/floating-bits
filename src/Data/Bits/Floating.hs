@@ -69,11 +69,12 @@ class (Floating f, Integral w) => FloatingBits f w | f -> w where
     --   If the argument is 0.0, the maximum value smaller than 0.0 is returned.
     --   If the argument is -INF, -INF is returned.
     nextDown :: f -> f
-    -- | Return the size of an ulp of the argument. If the argument is NaN, NaN
-    --   is returned. If the argument is +INF or -INF, +INF is returned. If
-    --   the argument is 0.0, the minimum value greater than 0.0 is returned.
+    -- | Return the size of the Unit of Least Precision of the argument.
+    --   If the argument is NaN, NaN is returned.
+    --   If the argument is +INF or -INF, +INF is returned.
+    --   If the argument is 0.0, the minimum value greater than 0.0 is returned.
     --
-    --   If @x@ is not NaN, @'ulp' x == 'ulp' (-x)@ holds.
+    --   If @x@ is not NaN or one of the infinities, @'ulp' x == 'ulp' (-x)@ holds.
     ulp :: f -> f
 
 class ShowFloat f where
