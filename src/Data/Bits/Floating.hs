@@ -1,14 +1,15 @@
 {-# LANGUAGE FunctionalDependencies #-}
 -----------------------------------------------------------------------------
 -- |
--- Copyright   :  (C) 2015 Anselm Jonas Scholl
+-- Copyright   :  (C) 2015 Anselm Jonas Scholl, (C) 2023 Julia Longtin
 -- License     :  BSD3
--- Maintainer  :  Anselm Jonas Scholl <anselm.scholl@tu-harburg.de>
+-- Maintainer  :  Julia Longtin <Julia.Longtin@gmail.com>
 -- Stability   :  experimental
 -- Portability :  GHC-specific
 --
--- Conversions between floating point values and integral values preserving
--- the bit-patterns.
+-- Functions for performing conversions between floating point values and
+-- Integral values, for retrieving the Unit of Least Precision of a floating
+-- point value, and for incrementing / decrementing a value by one ULP..
 ----------------------------------------------------------------------------
 module Data.Bits.Floating (
 
@@ -57,14 +58,16 @@ class (Floating f, Integral w) => FloatingBits f w | f -> w where
     --   @'coerceToWord' ('coerceToFloat' w) /= w@.
     coerceToFloat :: w -> f
     -- | Return the next floating point value in the direction of +INF.
-    --   If the argument is NaN, NaN is returned. If the argument is +INF,
-    --   +INF is returned. If the argument is 0.0, the minimum value greater than
-    --   0.0 is returned.
+    --   If the argument is NaN, NaN is returned.
+    --   If the argument is +INF, +INF is returned.
+    --   If the argument is 0.0, the minimum value greater than 0.0 is returned.
+    --   If the argument is -INF, -INF is returned.
     nextUp :: f -> f
     -- | Return the next floating point value in the direction of -INF.
-    --   If the argument is NaN, NaN is returned. If the argument is -INF,
-    --   +INF is returned. If the argument is 0.0, the maximum value smaller than
-    --   0.0 is returned.
+    --   If the argument is NaN, NaN is returned.
+    --   If the argument is +INF, +INF is returned.
+    --   If the argument is 0.0, the maximum value smaller than 0.0 is returned.
+    --   If the argument is -INF, -INF is returned.
     nextDown :: f -> f
     -- | Return the size of an ulp of the argument. If the argument is NaN, NaN
     --   is returned. If the argument is +INF or -INF, +INF is returned. If
