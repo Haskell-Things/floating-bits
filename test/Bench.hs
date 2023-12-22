@@ -1,11 +1,23 @@
+-----------------------------------------------------------------------------
+-- |
+-- Copyright   :  (C) 2015 Anselm Jonas Scholl, (C) 2023 Julia Longtin
+-- License     :  BSD3
+-- Maintainer  :  Julia Longtin <Julia.Longtin@gmail.com>
+-- Stability   :  experimental
+-- Portability :  GHC-specific
+--
+
 module Main where
 
-import TestUtils
+import Prelude (Double, Float, IO, ($), (++), concatMap, map, shows, unzip)
 
-import Data.Word
-import Data.Bits.Floating
+import TestUtils (refDoubleDown, refDoubleToWord, refDoubleUp, refDoubleUlp, refFloatDown, refFloatToWord, refFloatUp, refFloatUlp, refWordToDouble, refWordToFloat, showW, testD, testF)
 
-import Criterion.Main
+import Data.Word (Word32, Word64)
+
+import Data.Bits.Floating (coerceToFloat, coerceToWord, nextDown, nextUp, ulp)
+
+import Criterion.Main (Benchmark, bench, bgroup, defaultMain, nf)
 
 mkSingleBenchmarks :: ((Float, Word32) -> [Benchmark]) -> ((Double, Word64) -> [Benchmark]) -> [Benchmark]
 mkSingleBenchmarks mkFTest mkDTest = concatMap mkFTest testF ++ concatMap mkDTest testD
