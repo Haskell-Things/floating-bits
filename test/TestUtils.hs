@@ -1,9 +1,21 @@
+-----------------------------------------------------------------------------
+-- |
+-- Copyright   :  (C) 2015 Anselm Jonas Scholl, (C) 2023 Julia Longtin
+-- License     :  BSD3
+-- Maintainer  :  Julia Longtin <Julia.Longtin@gmail.com>
+-- Stability   :  experimental
+-- Portability :  GHC-specific
+--
+
 {-# LANGUAGE ForeignFunctionInterface #-}
+
 module TestUtils where
 
-import Data.Word
+import Prelude (Double, Float, Integral, Show, String, (/), pi, sqrt)
 
-import Numeric
+import Data.Word (Word32, Word64)
+
+import Numeric (showHex)
 
 -- we do not test NaNs here because their binary representation can be changed
 -- without changing their value and some processors have been observed to do that.

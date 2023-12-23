@@ -1,16 +1,30 @@
+-----------------------------------------------------------------------------
+-- |
+-- Copyright   :  (C) 2015 Anselm Jonas Scholl, (C) 2023 Julia Longtin
+-- License     :  BSD3
+-- Maintainer  :  Julia Longtin <Julia.Longtin@gmail.com>
+-- Stability   :  experimental
+-- Portability :  GHC-specific
+--
+
 {-# LANGUAGE BangPatterns #-}
+
 {-# LANGUAGE ScopedTypeVariables #-}
+
 module Main where
 
-import TestUtils
+import Prelude(Bool(False), Double, Float, Integral, IO, MonadFail, RealFloat, Show, String, (.), (<), ($), (+), (-), (&&), (++), (<=), (>=), (/=), (==), (||), (<$>), either, fail, fromIntegral, fst, isInfinite, isNaN, isNegativeZero, mapM_, maxBound, minBound, not, otherwise, putStrLn, realToFrac, rem, return, quot, show, shows, snd)
 
-import Data.Word
-import Data.Bits
-import Data.Bits.Floating
+import TestUtils (refDoubleDown, refDoubleToWord, refDoubleUp, refDoubleUlp, refFloatDown, refFloatToWord, refFloatUlp, refFloatUp, refWordToDouble, refWordToFloat, showW, testD, testF)
 
-import Control.Concurrent
-import Control.Exception
-import Control.Monad
+import Data.Word (Word32, Word64)
+
+import Data.Bits ((.&.), complement)
+import Data.Bits.Floating (FloatingBits, ShowFloat, coerceToFloat, coerceToWord, nextDown, nextUp, showFloat, ulp)
+
+import Control.Concurrent (MVar, forkIO, getNumCapabilities, newEmptyMVar, putMVar, takeMVar)
+import Control.Exception (SomeException, throwIO, try)
+import Control.Monad (forM_, join, replicateM_, unless, void, when)
 
 main :: IO ()
 main = do
