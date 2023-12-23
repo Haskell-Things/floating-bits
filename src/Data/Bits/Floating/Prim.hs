@@ -17,6 +17,7 @@
 {-# LANGUAGE UnliftedFFITypes         #-}
 {-# LANGUAGE CPP                      #-}
 
+-- Note: HLint fails to find this, and will always warn.
 #include "MachDeps.h"
 
 module Data.Bits.Floating.Prim (
@@ -31,6 +32,7 @@ import Prelude ()
 import GHC.Exts (Double#, Double(D#), Float#, Float(F#))
 import GHC.Word (Word32(W32#), Word64(W64#))
 
+#if defined(WORD_SIZE_IN_BITS)
 #if WORD_SIZE_IN_BITS == 64 && MIN_VERSION_base(4,17,0)
 -- The name of Word# changed to Word64# in base 4.17.0 (GHC 9.4.1)
 import GHC.Exts (Word64#, Word32#)
@@ -51,6 +53,7 @@ import GHC.Exts (Word32#)
 #endif
 #else
 #error non-X86_64 architectures not supported
+#endif
 #endif
 
 foreign import prim "double2WordBwzh"
